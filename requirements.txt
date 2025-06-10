@@ -120,3 +120,9 @@ wcwidth==0.2.13
 webcolors==24.11.1
 webencodings==0.5.1
 websocket-client==1.8.0
+
+
+# API
+fastapi==0.108.0
+pytz
+uvicorn
