@@ -126,3 +126,6 @@ websocket-client==1.8.0
 fastapi==0.108.0
 pytz
 uvicorn
+
+#Huggingface
+transformers
