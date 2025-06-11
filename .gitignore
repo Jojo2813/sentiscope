@@ -43,5 +43,6 @@ models/
 secrets.toml
 *.json
 
-# User defined extras
-# Complete to your desire
+# Intermediate pickle and npy files
+notebooks/embeddings_batches
+notebooks/padded_embeddings
