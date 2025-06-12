@@ -22,21 +22,30 @@ def basic_cleaning(text):
 
     #No whitespaces in beginning or end
     text = text.strip()
+
     #lowercase
     text= text.lower()
+
     #remove numbers
     text = re.sub(r'\b\d+\b', '', text)
 
+    #Removing punctuation
     text = re.sub(rf"[{re.escape(string.punctuation)}]", '', text)
 
     # Tokenizing
     tokenized = word_tokenize(text)
+
     # Lemmatizing
     lemmatizer = WordNetLemmatizer()
     lemmatized = [lemmatizer.lemmatize(word) for word in tokenized]
+
     text = " ".join(lemmatized)
     return text
 
 def preprocess_series(X):
-        """Helper function for pipeline"""
+        """
+        Helper function for pipeline
+        This function always has to be available in the namespace when loading
+        the pipeline.
+        """
         return[basic_cleaning(text) for text in X]

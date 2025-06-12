@@ -5,7 +5,7 @@ import pandas as pd
 import string
 import re
 
-#Saving the pipeline
+#Loading the saved pipeline
 import pickle
 
 #Helper function
@@ -22,20 +22,18 @@ def preprocess_ml(X):
     Output: Sparse Matrix (float64)
     """
 
-    print("CLEANING!")
-
-    #Turn input into pandas Series
+    #Turn input into pandas Series, that's what the pipeline expects
     if type(X) != pd.core.series.Series:
         X = pd.Series(X)
 
+    #TODO: store path in .env file?
     path_to_pipeline = "preprocessing_pipelines/preproc_pipeline_ml.pkl"
-
-
 
     # Load the pipeline using Pickle
     with open(path_to_pipeline, 'rb') as file:
         preproc_pipeline = pickle.load(file)
 
+    #Let the pipeline trnsform the input to get it ready for the model
     X_processed = preproc_pipeline.transform(X)
 
     return X_processed
