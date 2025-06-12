@@ -10,8 +10,6 @@ import re
 from nltk import word_tokenize
 from nltk.stem import WordNetLemmatizer
 
-#Saving the pipeline
-import pickle
 
 def basic_cleaning(text):
     """
@@ -39,33 +37,6 @@ def basic_cleaning(text):
     text = " ".join(lemmatized)
     return text
 
-
-def preprocess_ml(X):
-    """
-    Function that uses a pipeline to preprocess natural language to get it
-    ready for a classical machine learning model. Data gets cleaned and
-    vectorized using a TF-IDF vectorizer from sklearn.
-
-    Input: Pandas Series
-    Output: Sparse Matrix (float64)
-    """
-
-    def preprocess_series(X):
+def preprocess_series(X):
         """Helper function for pipeline"""
         return[basic_cleaning(text) for text in X]
-
-    #Turn input into pandas Series
-    if type(X) != pd.core.series.Series:
-        X = pd.Series(X)
-
-    path_to_pipeline = "preprocessing_pipelines/preproc_pipeline_ml.pkl"
-
-
-
-    # Load the pipeline using Pickle
-    with open(path_to_pipeline, 'rb') as file:
-        preproc_pipeline = pickle.load(file)
-
-    X_processed = preproc_pipeline.transform(X)
-
-    return X_processed
