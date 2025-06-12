@@ -7,6 +7,7 @@ def predict(input):
     Input: Vectorized user input
     Output: label (-1: bad, 0 : good)
     """
+    print("PREDICTING!")
 
     #Load the model
     model = joblib.load(\
