@@ -44,6 +44,7 @@ gcloud-set-project:
 # i.e. linux/amd64 for Windows / Linux / Apple with Intel chip
 #      linux/arm64 for Apple with Apple Silicon (M1 / M2 chip)
 
+# These are cmd for Mac users
 docker_build_local:
 	docker build --tag=$(GAR_IMAGE):local .
 
@@ -74,7 +75,7 @@ docker_push:
 	docker push ${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT}/${GAR_REPO}/${GAR_IMAGE}:prod
 
 docker_run:
-	docker run -e PORT=8000 -p 8000:8000 --env-file .env ${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT}/${GAR_REPO}/${GAR_IMAGE}:prod
+	docker run -e PORT=8000 -p 8080:8000 --env-file .env ${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT}/${GAR_REPO}/${GAR_IMAGE}:prod
 
 docker_interactive:
 	docker run -it --env-file .env ${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT}/${GAR_REPO}/${GAR_IMAGE}:prod /bin/bash
