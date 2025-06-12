@@ -44,11 +44,40 @@ def predict_sentiment(review):
     #Predict the sentiment of the review
     prediction = predict(X_pred, app.state.model)
 
+    vectorizer = pipe['vectorizer']
+
+    coefs = app.state.model.coef_[0]
+    feature_names = vectorizer.get_feature_names_out()
+
+    input_indices = X_pred.nonzero()[1]
+    tfidf_values = X_pred.toarray()[0][input_indices]
+    input_tokens = [feature_names[i] for i in input_indices]
+    word_coefs = coefs[input_indices]
+
+    # Compute word contributions
+    contributions = tfidf_values * word_coefs
+    contrib_dict = dict(zip(input_tokens, contributions))
+
+    # Sort contributions to find top positives and negatives
+    sorted_items = sorted(contrib_dict.items(), key=lambda x: x[1])
+    top_negative = [w for w, _ in sorted_items[:2]]
+    top_positive = [w for w, _ in sorted_items[-2:]]
+
     #Turn predicted label to readable text
     if prediction == -1:
-        return {"Sentiment": "Negative"}
+        return {
+            "Sentiment": "Negative",
+            "contributions": contrib_dict,
+            "top_positive": top_positive,
+            "top_negative": top_negative
+            }
     elif prediction == 0:
-        return {"Sentiment": "Positive"}
+        return {
+            "Sentiment": "Positive",
+            "contributions": contrib_dict,
+            "top_positive": top_positive,
+            "top_negative": top_negative
+            }
     else:
         return {"Sentiment": "No output"}
 
