@@ -9,12 +9,16 @@ from sentiscope.ml_logic.model import predict
 #Testing model and preprocessing
 def test_package(text):
 
+    #Preprocess input
     vector_text = preprocess_ml(text)
 
+    #Predict sentiment
     prediction = predict(vector_text)
 
+    #Check sentiment
     print(prediction)
 
 if __name__ == "__main__":
-    text = ["I would not buy again", "I hate it", "I love it"]
+    #Insert any string you want
+    text = "I love htat I hate it"
     test_package(text)

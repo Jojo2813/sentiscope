@@ -1,5 +1,12 @@
 import joblib
 
+def load_model():
+    #Load the model
+    model = joblib.load(\
+        "/Users/johannesb/code/Jojo2813/SentiScope/model/logreg_full.pkl")
+
+    return model
+
 def predict(input):
     """
     Function that loads trained logistic regression model
@@ -9,9 +16,7 @@ def predict(input):
     """
     print("PREDICTING!")
 
-    #Load the model
-    model = joblib.load(\
-        "/Users/johannesb/code/Jojo2813/SentiScope/model/logreg_full.pkl")
+    model = load_model()
 
     #Make a prediction
     prediction = model.predict(input)
