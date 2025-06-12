@@ -49,6 +49,11 @@ def preprocess_ml(X):
     Input: Pandas Series
     Output: Sparse Matrix (float64)
     """
+
+    #Turn input into pandas Series
+    if type(X) != pd.core.series.Series:
+        X = pd.Series(X)
+
     path_to_pipeline = "preprocessing_pipelines/preproc_pipeline_ml.pkl"
 
 
