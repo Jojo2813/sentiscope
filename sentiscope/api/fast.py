@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 #Preprocessing
-from sentiscope.ml_logic.preprocessor import preprocess_ml
+from sentiscope.ml_logic.preprocessor import preprocess_ml, load_pipeline
 from sentiscope.ml_logic.utils import preprocess_series
 
 #Prediction
@@ -13,7 +13,7 @@ from sentiscope.ml_logic.model import predict, load_model
 app = FastAPI()
 
 #Store model once loaded -> Speed up future requests
-app.state.model = load_model()
+app.state.model = load_model('gcs')
 
 # Allowing all middleware is optional, but good practice for dev purposes
 app.add_middleware(
@@ -36,11 +36,13 @@ def predict_sentiment(review):
     http://127.0.0.1:8000/predict?review=This+is+a+bad+review
     """
 
+    pipe = load_pipeline('gcs')
+
     #Preprocess the review
-    X_pred = preprocess_ml(review)
+    X_pred = preprocess_ml(review,pipe)
 
     #Predict the sentiment of the review
-    prediction = predict(X_pred)
+    prediction = predict(X_pred, app.state.model)
 
     #Turn predicted label to readable text
     if prediction == -1:

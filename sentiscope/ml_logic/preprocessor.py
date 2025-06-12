@@ -11,8 +11,29 @@ import pickle
 #Helper function
 from sentiscope.ml_logic.utils import preprocess_series
 
+from google.cloud import storage
+from sentiscope.params import *
 
-def preprocess_ml(X):
+def load_pipeline(target):
+
+    if target == 'local':
+        #Load the model from local
+        with open ("/Users/johannesb/code/Jojo2813/SentiScope/preprocessing_pipelines/preproc_pipeline_ml.pkl", \
+            'rb') as file:
+            pipe = pickle.load(file)
+    elif target == 'gcs':
+        client = storage.Client()
+        bucket = client.bucket(BUCKET_NAME)
+        blob = bucket.blob(PIPE_BLOB)
+        blob.download_to_filename("/Users/johannesb/code/Jojo2813/SentiScope/preprocessing_pipelines/preproc_pipeline_ml.pkl")
+
+        with open ("/Users/johannesb/code/Jojo2813/SentiScope/preprocessing_pipelines/preproc_pipeline_ml.pkl", \
+            'rb') as file:
+            pipe = pickle.load(file)
+    return pipe
+
+
+def preprocess_ml(X,pipe):
     """
     Function that uses a pipeline to preprocess natural language to get it
     ready for a classical machine learning model. Data gets cleaned and
@@ -26,14 +47,7 @@ def preprocess_ml(X):
     if type(X) != pd.core.series.Series:
         X = pd.Series(X)
 
-    #TODO: store path in .env file?
-    path_to_pipeline = "preprocessing_pipelines/preproc_pipeline_ml.pkl"
-
-    # Load the pipeline using Pickle
-    with open(path_to_pipeline, 'rb') as file:
-        preproc_pipeline = pickle.load(file)
-
     #Let the pipeline trnsform the input to get it ready for the model
-    X_processed = preproc_pipeline.transform(X)
+    X_processed = pipe.transform(X)
 
     return X_processed
