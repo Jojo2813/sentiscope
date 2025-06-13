@@ -7,14 +7,14 @@ def load_model(target):
     if target == 'local':
         #Load the model from local
         model = joblib.load(\
-            "/Users/johannesb/code/Jojo2813/SentiScope/model/logreg_full.pkl")
+            "./models/logreg_full.pkl")
     elif target == 'gcs':
         client = storage.Client()
         bucket = client.bucket(BUCKET_NAME)
         blob = bucket.blob(MODEL_BLOB)
-        blob.download_to_filename("/Users/johannesb/code/Jojo2813/SentiScope/model/logreg_full.pkl")
+        blob.download_to_filename("./models/logreg_full.pkl")
 
-        model = joblib.load("/Users/johannesb/code/Jojo2813/SentiScope/model/logreg_full.pkl")
+        model = joblib.load("./models/logreg_full.pkl")
     return model
 
 def predict(input, model):

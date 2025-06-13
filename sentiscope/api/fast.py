@@ -18,7 +18,7 @@ class Text(BaseModel):
     text: str
 
 #Store model once loaded -> Speed up future requests
-app.state.model = load_model('gcs')
+app.state.model = load_model('local')
 
 # Allowing all middleware is optional, but good practice for dev purposes
 app.add_middleware(
@@ -41,7 +41,7 @@ def predict_sentiment(review):
     http://127.0.0.1:8000/predict?review=This+is+a+bad+review
     """
 
-    pipe = load_pipeline('gcs')
+    pipe = load_pipeline('local')
 
     #Preprocess the review
     X_pred = preprocess_ml(review,pipe)
@@ -91,7 +91,7 @@ def predict_sentiment(review):
 def receive_text(my_text: Text):
     body = my_text.text
 
-    pipe = load_pipeline('gcs')
+    pipe = load_pipeline('local')
 
     #Preprocess the review
     X_pred = preprocess_ml(body,pipe)

@@ -5,6 +5,7 @@ from sentiscope.ml_logic.utils import preprocess_series
 
 #Prediction
 from sentiscope.ml_logic.model import predict, load_model
+from sentiscope.params import *
 
 #Testing model and preprocessing
 def test_package(text):
