@@ -12,6 +12,7 @@ import dill
 #Helper function
 from sentiscope.ml_logic.utils import preprocess_series
 
+#GCS imports
 from google.cloud import storage
 from sentiscope.params import *
 
@@ -23,6 +24,7 @@ def load_pipeline(target):
             'rb') as file:
             pipe = dill.load(file)
     elif target == 'gcs':
+        #Load model from gcs
         client = storage.Client()
         bucket = client.bucket(BUCKET_NAME)
         blob = bucket.blob(PIPE_BLOB)

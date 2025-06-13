@@ -9,6 +9,7 @@ def load_model(target):
         model = joblib.load(\
             "./models/logreg_full.pkl")
     elif target == 'gcs':
+        #Load model from gcs
         client = storage.Client()
         bucket = client.bucket(BUCKET_NAME)
         blob = bucket.blob(MODEL_BLOB)
