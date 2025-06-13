@@ -7,10 +7,12 @@ import re
 
 #Loading the saved pipeline
 import pickle
+import dill
 
 #Helper function
 from sentiscope.ml_logic.utils import preprocess_series
 
+#GCS imports
 from google.cloud import storage
 from sentiscope.params import *
 
@@ -18,10 +20,11 @@ def load_pipeline(target):
 
     if target == 'local':
         #Load the model from local
-        with open ("/Users/johannesb/code/Jojo2813/SentiScope/preprocessing_pipelines/preproc_pipeline_ml.pkl", \
+        with open ("./models/preproc_pipeline_ml_2.pkl", \
             'rb') as file:
-            pipe = pickle.load(file)
+            pipe = dill.load(file)
     elif target == 'gcs':
+        #Load model from gcs
         client = storage.Client()
         bucket = client.bucket(BUCKET_NAME)
         blob = bucket.blob(PIPE_BLOB)
@@ -30,6 +33,12 @@ def load_pipeline(target):
         with open ("/Users/johannesb/code/Jojo2813/SentiScope/preprocessing_pipelines/preproc_pipeline_ml.pkl", \
             'rb') as file:
             pipe = pickle.load(file)
+
+        # Ensure full recursive serialization
+        dill.settings['recurse'] = True
+        with open("./models/preproc_pipeline_ml_2.pkl", "wb") as f:
+            dill.dump(pipe, f)
+
     return pipe
 
 

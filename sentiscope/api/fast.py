@@ -9,11 +9,18 @@ from sentiscope.ml_logic.utils import preprocess_series
 #Prediction
 from sentiscope.ml_logic.model import predict, load_model
 
+#Post request import
+from pydantic import BaseModel
+
 #Initialize FastAPI
 app = FastAPI()
 
+#Class for post request text
+class Text(BaseModel):
+    text: str
+
 #Store model once loaded -> Speed up future requests
-app.state.model = load_model('gcs')
+app.state.model = load_model('local')
 
 # Allowing all middleware is optional, but good practice for dev purposes
 app.add_middleware(
@@ -36,10 +43,62 @@ def predict_sentiment(review):
     http://127.0.0.1:8000/predict?review=This+is+a+bad+review
     """
 
-    pipe = load_pipeline('gcs')
+    pipe = load_pipeline('local')
 
     #Preprocess the review
     X_pred = preprocess_ml(review,pipe)
+
+    #Predict the sentiment of the review
+    prediction = predict(X_pred, app.state.model)
+
+    #Extract vectorizer for visualization data
+    vectorizer = pipe['vectorizer']
+
+    #Extract data from model and vectorizer
+    coefs = app.state.model.coef_[0]
+    feature_names = vectorizer.get_feature_names_out()
+    input_indices = X_pred.nonzero()[1]
+    tfidf_values = X_pred.toarray()[0][input_indices]
+    input_tokens = [feature_names[i] for i in input_indices]
+    word_coefs = coefs[input_indices]
+
+    # Compute word contributions
+    contributions = tfidf_values * word_coefs
+    contrib_dict = dict(zip(input_tokens, contributions))
+
+    # Sort contributions to find top positives and negatives
+    sorted_items = sorted(contrib_dict.items(), key=lambda x: x[1])
+    top_negative = [w for w, _ in sorted_items[:2]]
+    top_positive = [w for w, _ in sorted_items[-2:]]
+
+    #Turn predicted label to readable text and also return vis. data
+    if prediction == -1:
+        return {
+            "Sentiment": "Negative",
+            "contributions": contrib_dict,
+            "top_positive": top_positive,
+            "top_negative": top_negative
+            }
+    elif prediction == 0:
+        return {
+            "Sentiment": "Positive",
+            "contributions": contrib_dict,
+            "top_positive": top_positive,
+            "top_negative": top_negative
+            }
+    else:
+        return {"Sentiment": "No output"}
+
+
+#TODO:finish this endpoint
+@app.post("/text")
+def receive_text(my_text: Text):
+    body = my_text.text
+
+    pipe = load_pipeline('local')
+
+    #Preprocess the review
+    X_pred = preprocess_ml(body,pipe)
 
     #Predict the sentiment of the review
     prediction = predict(X_pred, app.state.model)
