@@ -9,11 +9,13 @@ from sentiscope.ml_logic.utils import preprocess_series
 #Prediction
 from sentiscope.ml_logic.model import predict, load_model
 
+#Post request import
 from pydantic import BaseModel
 
 #Initialize FastAPI
 app = FastAPI()
 
+#Class for post request text
 class Text(BaseModel):
     text: str
 
@@ -49,11 +51,12 @@ def predict_sentiment(review):
     #Predict the sentiment of the review
     prediction = predict(X_pred, app.state.model)
 
+    #Extract vectorizer for visualization data
     vectorizer = pipe['vectorizer']
 
+    #Extract data from model and vectorizer
     coefs = app.state.model.coef_[0]
     feature_names = vectorizer.get_feature_names_out()
-
     input_indices = X_pred.nonzero()[1]
     tfidf_values = X_pred.toarray()[0][input_indices]
     input_tokens = [feature_names[i] for i in input_indices]
@@ -68,7 +71,7 @@ def predict_sentiment(review):
     top_negative = [w for w, _ in sorted_items[:2]]
     top_positive = [w for w, _ in sorted_items[-2:]]
 
-    #Turn predicted label to readable text
+    #Turn predicted label to readable text and also return vis. data
     if prediction == -1:
         return {
             "Sentiment": "Negative",
@@ -87,6 +90,7 @@ def predict_sentiment(review):
         return {"Sentiment": "No output"}
 
 
+#TODO:finish this endpoint
 @app.post("/text")
 def receive_text(my_text: Text):
     body = my_text.text
