@@ -13,7 +13,7 @@ from sentiscope.ml_logic.model import predict, load_model
 app = FastAPI()
 
 #Store model once loaded -> Speed up future requests
-app.state.model = load_model('gcs')
+app.state.model = load_model('local')
 
 # Allowing all middleware is optional, but good practice for dev purposes
 app.add_middleware(
@@ -36,7 +36,7 @@ def predict_sentiment(review):
     http://127.0.0.1:8000/predict?review=This+is+a+bad+review
     """
 
-    pipe = load_pipeline('gcs')
+    pipe = load_pipeline('local')
 
     #Preprocess the review
     X_pred = preprocess_ml(review,pipe)

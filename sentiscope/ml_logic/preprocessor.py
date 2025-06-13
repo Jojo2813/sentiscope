@@ -1,5 +1,6 @@
 #Data
 import pandas as pd
+import os
 
 #Basic cleaning
 import string
@@ -18,9 +19,10 @@ def load_pipeline(target):
 
     if target == 'local':
         #Load the model from local
-        with open ("/Users/johannesb/code/Jojo2813/SentiScope/preprocessing_pipelines/preproc_pipeline_ml.pkl", \
+        with open ("./../models/preproc_pipeline_ml.pkl", \
             'rb') as file:
             pipe = pickle.load(file)
+
     elif target == 'gcs':
         client = storage.Client()
         bucket = client.bucket(BUCKET_NAME)
@@ -30,6 +32,7 @@ def load_pipeline(target):
         with open ("/Users/johannesb/code/Jojo2813/SentiScope/preprocessing_pipelines/preproc_pipeline_ml.pkl", \
             'rb') as file:
             pipe = pickle.load(file)
+
     return pipe
 
 
