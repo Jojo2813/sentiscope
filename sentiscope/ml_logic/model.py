@@ -7,7 +7,7 @@ def load_model(target):
     if target == 'local':
         #Load the model from local
         model = joblib.load(\
-            "./../models/logreg_full.pkl")
+            "./models/logreg_full.pkl")
     elif target == 'gcs':
         client = storage.Client()
         bucket = client.bucket(BUCKET_NAME)
