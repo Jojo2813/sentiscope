@@ -8,6 +8,10 @@ import re
 
 #Loading the saved pipeline
 import pickle
+import dill
+
+# Ensure full recursive serialization
+dill.settings['recurse'] = True
 
 #Helper function
 from sentiscope.ml_logic.utils import preprocess_series
@@ -19,9 +23,9 @@ def load_pipeline(target):
 
     if target == 'local':
         #Load the model from local
-        with open ("./../models/preproc_pipeline_ml.pkl", \
+        with open ("./models/preproc_pipeline_ml_2.pkl", \
             'rb') as file:
-            pipe = pickle.load(file)
+            pipe = dill.load(file)
 
     elif target == 'gcs':
         client = storage.Client()
