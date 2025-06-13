@@ -1,0 +1,4 @@
+fastapi==0.108.0
+pytz
+uvicorn
+pandas==2.3.0
