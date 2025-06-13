@@ -3,9 +3,13 @@ FROM python:3.10.6-buster
 WORKDIR /prod
 
 # We strip the requirements from useless packages like `ipykernel`, `matplotlib` etc...
-COPY api_requirements.txt requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt requirements.txt
+#RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
-COPY api api
+COPY sentiscope sentiscope
+COPY models models
 
-CMD uvicorn api.fast:app --host 0.0.0.0 --port $PORT
+#COPY home/marcvicente/.pyenv/versions/sentiscope/bin/uvicorn usr/local/bin/uvicorn
+
+CMD uvicorn sentiscope.api.fast:app --host 0.0.0.0 --port $PORT
