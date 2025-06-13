@@ -1,6 +1,11 @@
 import pandas as pd
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+
+
+class Text(BaseModel):
+    text: str
 
 app = FastAPI()
 
@@ -17,3 +22,10 @@ app.add_middleware(
 @app.get("/")
 def root():
     return {'greeting':'Hello'}
+
+@app.post("/text")
+def receive_text(my_text: Text):
+    import ipdb; ipdb.set_trace()
+    body = my_text.text
+    num_words = len(body)
+    return {"text_length": num_words}
