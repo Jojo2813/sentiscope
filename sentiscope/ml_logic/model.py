@@ -1,8 +1,18 @@
 import joblib
 from google.cloud import storage
+
+from transformers import TFAutoModelForSequenceClassification
+
 from sentiscope.params import *
 
-def load_model(target):
+#Load the DL model
+def load_dl_model():
+    model = TFAutoModelForSequenceClassification.\
+        from_pretrained("./models/bert_tiny_180k")
+
+    return model
+
+def load_ml_model(target):
 
     if target == 'local':
         #Load the model from local

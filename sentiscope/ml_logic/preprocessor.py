@@ -16,6 +16,25 @@ from sentiscope.ml_logic.utils import preprocess_series
 from google.cloud import storage
 from sentiscope.params import *
 
+from transformers import AutoTokenizer
+
+def load_tokenizer():
+    tokenizer = AutoTokenizer.\
+        from_pretrained("./models/tokenizer_bert_tiny_180k")
+
+    return tokenizer
+
+def preprocess_dl(X, tokenizer):
+
+    if type(X) != pd.core.series.Series:
+        X = pd.Series(X)
+
+    tokenized_tensor = tokenizer(X.tolist(), \
+        max_length=400, padding = "max_length", \
+            truncation = True, return_tensors="tf")
+
+    return tokenized_tensor
+
 def load_pipeline(target):
 
     if target == 'local':
@@ -28,9 +47,9 @@ def load_pipeline(target):
         client = storage.Client()
         bucket = client.bucket(BUCKET_NAME)
         blob = bucket.blob(PIPE_BLOB)
-        blob.download_to_filename("/Users/johannesb/code/Jojo2813/SentiScope/preprocessing_pipelines/preproc_pipeline_ml.pkl")
+        blob.download_to_filename("./preprocessing_pipelines/preproc_pipeline_ml.pkl")
 
-        with open ("/Users/johannesb/code/Jojo2813/SentiScope/preprocessing_pipelines/preproc_pipeline_ml.pkl", \
+        with open ("./preprocessing_pipelines/preproc_pipeline_ml.pkl", \
             'rb') as file:
             pipe = pickle.load(file)
 

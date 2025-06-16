@@ -2,12 +2,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+import numpy as np
+
 #Preprocessing
-from sentiscope.ml_logic.preprocessor import preprocess_ml, load_pipeline
+from sentiscope.ml_logic.preprocessor import preprocess_ml, load_pipeline, \
+    load_tokenizer, preprocess_dl
 from sentiscope.ml_logic.utils import preprocess_series
 
 #Prediction
-from sentiscope.ml_logic.model import predict, load_model
+from sentiscope.ml_logic.model import predict, load_ml_model, load_dl_model
 
 #Post request import
 from pydantic import BaseModel
@@ -20,7 +23,10 @@ class Text(BaseModel):
     text: str
 
 #Store model once loaded -> Speed up future requests
-app.state.model = load_model('local')
+app.state.model_ml = load_ml_model('local')
+app.state.model_dl = load_dl_model()
+app.state.tokenizer = load_tokenizer()
+app.state.pipeline = load_pipeline('local')
 
 # Allowing all middleware is optional, but good practice for dev purposes
 app.add_middleware(
@@ -31,6 +37,29 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
+@app.get("/bert")
+def bert_predict(review):
+
+    X_pred = preprocess_dl(X=review, tokenizer=app.state.tokenizer)
+
+    prediction = app.state.model_dl.predict(X_pred)
+
+    #Get the actual label out of the predictions
+    logits = prediction.logits
+    y_pred = np.argmax(logits, axis=1).tolist()
+
+    if y_pred[0] == 0:
+        return {
+            "Sentiment" : "Negative"
+        }
+    elif y_pred[0] == 1:
+        return{
+            "Sentiment" : "Positive"
+        }
+    else:
+        return{
+            "Sentiment" : "No output"
+        }
 
 
 #Define /predict endpoint
@@ -43,19 +72,17 @@ def predict_sentiment(review):
     http://127.0.0.1:8000/predict?review=This+is+a+bad+review
     """
 
-    pipe = load_pipeline('local')
-
     #Preprocess the review
-    X_pred = preprocess_ml(review,pipe)
+    X_pred = preprocess_ml(review,app.state.pipeline)
 
     #Predict the sentiment of the review
-    prediction = predict(X_pred, app.state.model)
+    prediction = predict(X_pred, app.state.model_ml)
 
     #Extract vectorizer for visualization data
-    vectorizer = pipe['vectorizer']
+    vectorizer = app.state.pipeline['vectorizer']
 
     #Extract data from model and vectorizer
-    coefs = app.state.model.coef_[0]
+    coefs = app.state.model_ml.coef_[0]
     feature_names = vectorizer.get_feature_names_out()
     input_indices = X_pred.nonzero()[1]
     tfidf_values = X_pred.toarray()[0][input_indices]
@@ -95,17 +122,15 @@ def predict_sentiment(review):
 def receive_text(my_text: Text):
     body = my_text.text
 
-    pipe = load_pipeline('local')
-
     #Preprocess the review
-    X_pred = preprocess_ml(body,pipe)
+    X_pred = preprocess_ml(body,app.state.pipeline)
 
     #Predict the sentiment of the review
     prediction = predict(X_pred, app.state.model)
 
-    vectorizer = pipe['vectorizer']
+    vectorizer = app.state.pipeline['vectorizer']
 
-    coefs = app.state.model.coef_[0]
+    coefs = app.state.model_ml.coef_[0]
     feature_names = vectorizer.get_feature_names_out()
 
     input_indices = X_pred.nonzero()[1]
