@@ -16,19 +16,32 @@ from sentiscope.ml_logic.utils import preprocess_series
 from google.cloud import storage
 from sentiscope.params import *
 
+#Import to load bert tokenizer
 from transformers import AutoTokenizer
 
 def load_tokenizer():
+    """
+    Method to load tokenizer used for training of bert model
+    """
+
+    #Load from local
     tokenizer = AutoTokenizer.\
         from_pretrained("./models/tokenizer_bert_tiny_180k")
 
     return tokenizer
 
 def preprocess_dl(X, tokenizer):
+    """
+    Method to tokenize the user input with the tokenizer used during
+    training of the model.
 
+    Returns a tensorflow tensor object.
+    """
+    #Cast to expected type
     if type(X) != pd.core.series.Series:
         X = pd.Series(X)
 
+    #Tokenize and return input with same tokenizing params used during training
     tokenized_tensor = tokenizer(X.tolist(), \
         max_length=400, padding = "max_length", \
             truncation = True, return_tensors="tf")
@@ -47,7 +60,8 @@ def load_pipeline(target):
         client = storage.Client()
         bucket = client.bucket(BUCKET_NAME)
         blob = bucket.blob(PIPE_BLOB)
-        blob.download_to_filename("./preprocessing_pipelines/preproc_pipeline_ml.pkl")
+        blob.download_to_filename(\
+            "./preprocessing_pipelines/preproc_pipeline_ml.pkl")
 
         with open ("./preprocessing_pipelines/preproc_pipeline_ml.pkl", \
             'rb') as file:

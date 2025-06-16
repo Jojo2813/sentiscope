@@ -1,19 +1,27 @@
 import joblib
 from google.cloud import storage
 
+#Import for loading the bert model
 from transformers import TFAutoModelForSequenceClassification
 
+#Parameters
 from sentiscope.params import *
 
-#Load the DL model
 def load_dl_model():
+    """
+    Method to load pre trained bert-tiny model
+    """
+
+    #Load model from local file and return it
     model = TFAutoModelForSequenceClassification.\
         from_pretrained("./models/bert_tiny_180k")
 
     return model
 
 def load_ml_model(target):
-
+    """
+    Method to load pre trained logreg model
+    """
     if target == 'local':
         #Load the model from local
         model = joblib.load(\

@@ -1,7 +1,6 @@
 #API imports
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
 import numpy as np
 
 #Preprocessing
@@ -22,7 +21,7 @@ app = FastAPI()
 class Text(BaseModel):
     text: str
 
-#Store model once loaded -> Speed up future requests
+#Store models and preprocessing tools once loaded -> Speed up future requests
 app.state.model_ml = load_ml_model('local')
 app.state.model_dl = load_dl_model()
 app.state.tokenizer = load_tokenizer()
@@ -37,17 +36,28 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
+#Endpoint to use Deep Learning model
 @app.get("/bert")
 def bert_predict(review):
+    """
+    Make a prediction for the sentiment of a review using the bert-tiny model.
 
+    The format of the url should be like this:
+
+    http://127.0.0.1:8000/bert?review=This+is+a+bad+review
+    """
+
+    #Tokenize input
     X_pred = preprocess_dl(X=review, tokenizer=app.state.tokenizer)
 
+    #Get a sentiment prediction
     prediction = app.state.model_dl.predict(X_pred)
 
     #Get the actual label out of the predictions
     logits = prediction.logits
     y_pred = np.argmax(logits, axis=1).tolist()
 
+    #Convert class to natural language
     if y_pred[0] == 0:
         return {
             "Sentiment" : "Negative"
@@ -65,7 +75,8 @@ def bert_predict(review):
 #Define /predict endpoint
 @app.get("/predict")
 def predict_sentiment(review):
-    """Make a prediction for the sentiment of a single review.
+    """Make a prediction for the sentiment of a single review using a logisitc
+    regression model.
 
     The format of the url should be like this:
 
