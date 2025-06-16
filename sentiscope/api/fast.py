@@ -3,14 +3,19 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 #Preprocessing
-from sentiscope.ml_logic.preprocessor import preprocess_ml, load_pipeline
+from sentiscope.ml_logic.preprocessor import load_pipeline, \
+    load_tokenizer
 from sentiscope.ml_logic.utils import preprocess_series
 
 #Prediction
-from sentiscope.ml_logic.model import predict, load_model
+from sentiscope.ml_logic.model import load_ml_model, load_dl_model
 
 #Post request import
 from pydantic import BaseModel
+
+#imports for preprocessing, predictions and visualization parameters
+from sentiscope.ml_logic.explain import \
+    create_predict_fn, explain_with_lime, explain_ml
 
 #Initialize FastAPI
 app = FastAPI()
@@ -19,8 +24,11 @@ app = FastAPI()
 class Text(BaseModel):
     text: str
 
-#Store model once loaded -> Speed up future requests
-app.state.model = load_model('local')
+#Store models and preprocessing tools once loaded -> Speed up future requests
+app.state.model_ml = load_ml_model('local')
+app.state.model_dl = load_dl_model()
+app.state.tokenizer = load_tokenizer()
+app.state.pipeline = load_pipeline('local')
 
 # Allowing all middleware is optional, but good practice for dev purposes
 app.add_middleware(
@@ -31,114 +39,53 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
+#Endpoint to use Deep Learning model
+@app.get("/bert")
+def bert_predict(review):
+    """
+    Make a prediction for the sentiment of a review using the bert-tiny model.
+
+    The format of the url should be like this:
+
+    http://127.0.0.1:8000/bert?review=This+is+a+bad+review
+    """
+
+    #Define function needed to get bert prediction and analysis
+    predict_proba_fn = \
+        create_predict_fn(app.state.model_dl, app.state.tokenizer)
+
+    #Get sentiment and visualization params
+    explanation = explain_with_lime(review, predict_proba_fn)
+
+    return explanation
 
 
 #Define /predict endpoint
 @app.get("/predict")
 def predict_sentiment(review):
-    """Make a prediction for the sentiment of a single review.
+    """Make a prediction for the sentiment of a single review using a logisitc
+    regression model.
 
     The format of the url should be like this:
 
     http://127.0.0.1:8000/predict?review=This+is+a+bad+review
     """
 
-    pipe = load_pipeline('local')
-
-    #Preprocess the review
-    X_pred = preprocess_ml(review,pipe)
-
-    #Predict the sentiment of the review
-    prediction = predict(X_pred, app.state.model)
-
-    #Extract vectorizer for visualization data
-    vectorizer = pipe['vectorizer']
-
-    #Extract data from model and vectorizer
-    coefs = app.state.model.coef_[0]
-    feature_names = vectorizer.get_feature_names_out()
-    input_indices = X_pred.nonzero()[1]
-    tfidf_values = X_pred.toarray()[0][input_indices]
-    input_tokens = [feature_names[i] for i in input_indices]
-    word_coefs = coefs[input_indices]
-
-    # Compute word contributions
-    contributions = tfidf_values * word_coefs
-    contrib_dict = dict(zip(input_tokens, contributions))
-
-    # Sort contributions to find top positives and negatives
-    sorted_items = sorted(contrib_dict.items(), key=lambda x: x[1])
-    top_negative = [w for w, _ in sorted_items[:2]]
-    top_positive = [w for w, _ in sorted_items[-2:]]
-
-    #Turn predicted label to readable text and also return vis. data
-    if prediction == -1:
-        return {
-            "Sentiment": "Negative",
-            "contributions": contrib_dict,
-            "top_positive": top_positive,
-            "top_negative": top_negative
-            }
-    elif prediction == 0:
-        return {
-            "Sentiment": "Positive",
-            "contributions": contrib_dict,
-            "top_positive": top_positive,
-            "top_negative": top_negative
-            }
-    else:
-        return {"Sentiment": "No output"}
+    #Call function to preprocess and predict review
+    return explain_ml(review=review, \
+        model = app.state.model_ml, pipeline=app.state.pipeline)
 
 
-#TODO:finish this endpoint
 @app.post("/text")
 def receive_text(my_text: Text):
-    body = my_text.text
+    """
+    Endpoint to make a prediction via POST.
+    """
+    review = my_text.text
 
-    pipe = load_pipeline('local')
+    return explain_ml(review=review, \
+        model = app.state.model_ml, pipeline=app.state.pipeline)
 
-    #Preprocess the review
-    X_pred = preprocess_ml(body,pipe)
-
-    #Predict the sentiment of the review
-    prediction = predict(X_pred, app.state.model)
-
-    vectorizer = pipe['vectorizer']
-
-    coefs = app.state.model.coef_[0]
-    feature_names = vectorizer.get_feature_names_out()
-
-    input_indices = X_pred.nonzero()[1]
-    tfidf_values = X_pred.toarray()[0][input_indices]
-    input_tokens = [feature_names[i] for i in input_indices]
-    word_coefs = coefs[input_indices]
-
-    # Compute word contributions
-    contributions = tfidf_values * word_coefs
-    contrib_dict = dict(zip(input_tokens, contributions))
-
-    # Sort contributions to find top positives and negatives
-    sorted_items = sorted(contrib_dict.items(), key=lambda x: x[1])
-    top_negative = [w for w, _ in sorted_items[:2]]
-    top_positive = [w for w, _ in sorted_items[-2:]]
-
-    #Turn predicted label to readable text
-    if prediction == -1:
-        return {
-            "Sentiment": "Negative",
-            "contributions": contrib_dict,
-            "top_positive": top_positive,
-            "top_negative": top_negative
-            }
-    elif prediction == 0:
-        return {
-            "Sentiment": "Positive",
-            "contributions": contrib_dict,
-            "top_positive": top_positive,
-            "top_negative": top_negative
-            }
-    else:
-        return {"Sentiment": "No output"}
 
 #Root endpoint
 @app.get("/")
