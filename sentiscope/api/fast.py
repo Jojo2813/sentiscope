@@ -76,8 +76,8 @@ def predict_sentiment(review):
         model = app.state.model_ml, pipeline=app.state.pipeline)
 
 
-@app.post("/text")
-def receive_text(my_text: Text):
+@app.post("/text_ml")
+def receive_ml_text(my_text: Text):
     """
     Endpoint to make a prediction via POST.
     """
@@ -86,6 +86,23 @@ def receive_text(my_text: Text):
     return explain_ml(review=review, \
         model = app.state.model_ml, pipeline=app.state.pipeline)
 
+
+@app.post("/text_dl")
+def receive_dl_text(my_text: Text):
+    """
+    Endpoint to accept Post request and make prediction with BERT
+    """
+
+    review = my_text.text
+
+    #Define function needed to get bert prediction and analysis
+    predict_proba_fn = \
+        create_predict_fn(app.state.model_dl, app.state.tokenizer)
+
+    #Get sentiment and visualization params
+    explanation = explain_with_lime(review, predict_proba_fn)
+
+    return explanation
 
 #Root endpoint
 @app.get("/")
