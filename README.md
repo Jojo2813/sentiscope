@@ -109,11 +109,9 @@ Example response:
 
 > ✨ *Visuals are rendered in the frontend using the API’s explanation output.*
 
-You can embed example images using the following Markdown syntax once you have them:
 
-```markdown
-![Example BERT Visualization](assets/example_bert.png)
-```
+[Example BERT Visualization](assets/example_bert.png)
+
 
 
 ```
