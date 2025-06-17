@@ -110,11 +110,7 @@ Example response:
 > ✨ *Visuals are rendered in the frontend using the API’s explanation output.*
 
 
-[Example BERT Visualization](assets/example_bert.png)
-
-
-
-```
+![Example BERT Visualization](assets/example_bert.png)
 
 ---
 
