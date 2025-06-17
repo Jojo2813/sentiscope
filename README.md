@@ -60,11 +60,14 @@ uvicorn sentiscope.api.fast:app --host 0.0.0.0 --port 8000
 ---
 
 ## 🔗 API Endpoints
+> ✨ *Use the [API](https://sentiscope-811189409150.europe-west1.run.app/)*
 
 | Method | Endpoint               | Description                      |
 |--------|------------------------|----------------------------------|
 | POST   | `/text_ml`      | Predict using Logistic Regression |
 | POST   | `/text_dl`        | Predict using BERT Transformer     |
+| GET  | `/prdict`      | Predict using Logistic Regression |
+| GET   | `/text_dl`        | Predict using BERT Transformer     |
 
 Each response includes:
 - `sentiment`: The predicted label (`positive` or `negative`)
@@ -115,9 +118,10 @@ Example response:
 ---
 
 ## 👨‍💻 Team
-
-.
-
+- **Jonas Jäger** [GitHub](https://github.com/JonasJaeger28)
+- **Marc Vicente** [GitHub](https://github.com/marcvice9)
+- **Vinod Kamisetti** [GitHub](https://github.com/vinodkamisetti)
+- **Johannes Blass** [GitHub](https://github.com/Jojo2813)
 ---
 
 ## 📜 License
