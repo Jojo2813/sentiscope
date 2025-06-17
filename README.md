@@ -1,4 +1,4 @@
-# <img src="assets/logo.png" alt="SentiScope Logo" style="width:150px; margin-bottom: 10px;" /> SentiScope
+# <img src="assets/logo.png" alt="SentiScope Logo" style="width:100px; margin-bottom: 7px;" /> SentiScope
 
 **SentiScope** is a sentiment analysis and explainability platform designed to empower both consumers and businesses to analyze product reviews and understand **why** a sentiment decision was made. It provides an API that supports two models: Logistic Regression and BERT, along with interpretability features.
 
