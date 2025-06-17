@@ -68,8 +68,8 @@ uvicorn sentiscope.api.fast:app --host 0.0.0.0 --port 8000
 |--------|------------------------|----------------------------------|
 | POST   | `/text_ml`      | Predict using Logistic Regression |
 | POST   | `/text_dl`        | Predict using BERT Transformer     |
-| GET  | `/prdict`      | Predict using Logistic Regression |
-| GET   | `/text_dl`        | Predict using BERT Transformer     |
+| GET  | `/predict`      | Predict using Logistic Regression |
+| GET   | `/bert`        | Predict using BERT Transformer     |
 
 Each response includes:
 - `sentiment`: The predicted label (`positive` or `negative`)
@@ -112,7 +112,7 @@ Example response:
 
 ## 📊 Example Visualization
 
-> ✨ *Visuals are rendered in the frontend using the API’s explanation output.*
+> ✨ *Visuals are rendered in the [frontend](https://github.com/Jojo2813/sentiscope_front) using the API’s explanation output.*
 
 
 ![Example BERT Visualization](assets/example_bert.png)
