@@ -69,15 +69,21 @@ make run_api
 |--------|------------------------|----------------------------------|
 | POST   | `/text_ml`      | Predict using Logistic Regression |
 | POST   | `/text_dl`        | Predict using BERT Transformer     |
+| POST   | `/predict_csv`        | Batch prediction with Logistic Regression|
 | GET  | `/predict`      | Predict using Logistic Regression |
 | GET   | `/bert`        | Predict using BERT Transformer     |
 
 Each response includes:
-- `sentiment`: The predicted label (`Positive` or `Negative`)
+- `sentiment`: The predicted label (`Positive` or `Nsegative`)
 - `contributions`: Contributions of each word of the review
 - `top positive`: The 2 words with the highest positive contribution
 - `top negative`: The 2 words with the highest negative contribution
 
+The predict_csv endpoint expects a csv file with a "text" column.
+The output contains a list of dictionaries:
+- `Id` : The ID of the text
+- `text` : The original text
+- `predicted_sentiment` : The sentiment prediction for the given text
 
 Example `POST` request body:
 
