@@ -1,6 +1,9 @@
 #API imports
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+import pandas as pd
+import io
 
 #Preprocessing
 from sentiscope.ml_logic.preprocessor import load_pipeline, \
@@ -73,7 +76,7 @@ def predict_sentiment(review):
 
     #Call function to preprocess and predict review
     return explain_ml(review=review, \
-        model = app.state.model_ml, pipeline=app.state.pipeline)
+        model = app.state.model_ml, pipeline=app.state.pipeline,target='single')
 
 
 @app.post("/text_ml")
@@ -84,7 +87,7 @@ def receive_ml_text(my_text: Text):
     review = my_text.text
 
     return explain_ml(review=review, \
-        model = app.state.model_ml, pipeline=app.state.pipeline)
+        model = app.state.model_ml, pipeline=app.state.pipeline,target='single')
 
 
 @app.post("/text_dl")
@@ -104,8 +107,37 @@ def receive_dl_text(my_text: Text):
 
     return explanation
 
+#Endpoint for batch prediction, expects csv
+@app.post("/predict_csv")
+async def predict_from_csv(file: UploadFile = File(...)):
+
+    #Check if file is a csv
+    if not file.filename.endswith('.csv'):
+        return JSONResponse(content={"error":"Only CSV files are supported"},\
+            status_code=400)
+
+    #Turn csv to dataframe
+    content = await file.read()
+    df = pd.read_csv(io.StringIO(content.decode("utf-8")))
+
+    #Make sure there is a text column
+    if "text" not in df.columns:
+        return JSONResponse(\
+            content={"error": "CSV must contain a 'text' column"},\
+                status_code=400)
+
+    # Apply prediction
+    predictions = explain_ml(\
+        df['text'],app.state.model_ml, app.state.pipeline,target='batch')
+    df["predicted_sentiment"] = predictions
+    df["predicted_sentiment"] = \
+        df["predicted_sentiment"].map({-1: "Negative", 0: "Positive"})
+
+    # Return as JSON
+    return df.to_dict(orient="records")
+
 #Root endpoint
 @app.get("/")
 def root():
-    return {'Greeting':'''Welcome to the SentiScope api.Use the
-            /predict endpoint for predictions!'''}
+    return {'Greeting':'''Welcome to the SentiScope api. Use the
+            /docs endpoint to see the different endpoints!'''}

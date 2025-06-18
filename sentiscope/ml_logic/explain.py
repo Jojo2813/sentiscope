@@ -3,6 +3,7 @@ from lime.lime_text import LimeTextExplainer
 
 #Required imports
 import tensorflow as tf
+import pandas as pd
 
 #Preprocessing and prediction
 from sentiscope.ml_logic.model import predict
@@ -83,48 +84,52 @@ def explain_with_lime(text, predict_proba_fn, num_features=10):
         "top_negative": top_negative
     }
 
-
-def explain_ml(review,model, pipeline):
+#Target variable to distinguish between single and batch predictions
+#Only return word contribs etc. for single predictions
+def explain_ml(review,model, pipeline,target):
     #Preprocess the review
     X_pred = preprocess_ml(review,pipeline)
 
     #Predict the sentiment of the review
     prediction = predict(X_pred, model)
 
-    #Extract vectorizer for visualization data
-    vectorizer = pipeline['vectorizer']
+    if target == 'single':
+        #Extract vectorizer for visualization data
+        vectorizer = pipeline['vectorizer']
 
-    #Extract data from model and vectorizer
-    coefs = model.coef_[0]
-    feature_names = vectorizer.get_feature_names_out()
-    input_indices = X_pred.nonzero()[1]
-    tfidf_values = X_pred.toarray()[0][input_indices]
-    input_tokens = [feature_names[i] for i in input_indices]
-    word_coefs = coefs[input_indices]
+        #Extract data from model and vectorizer
+        coefs = model.coef_[0]
+        feature_names = vectorizer.get_feature_names_out()
+        input_indices = X_pred.nonzero()[1]
+        tfidf_values = X_pred.toarray()[0][input_indices]
+        input_tokens = [feature_names[i] for i in input_indices]
+        word_coefs = coefs[input_indices]
 
-    # Compute word contributions
-    contributions = tfidf_values * word_coefs
-    contrib_dict = dict(zip(input_tokens, contributions))
+        # Compute word contributions
+        contributions = tfidf_values * word_coefs
+        contrib_dict = dict(zip(input_tokens, contributions))
 
-    # Sort contributions to find top positives and negatives
-    sorted_items = sorted(contrib_dict.items(), key=lambda x: x[1])
-    top_negative = [w for w, _ in sorted_items[:2]]
-    top_positive = [w for w, _ in sorted_items[-2:]]
+        # Sort contributions to find top positives and negatives
+        sorted_items = sorted(contrib_dict.items(), key=lambda x: x[1])
+        top_negative = [w for w, _ in sorted_items[:2]]
+        top_positive = [w for w, _ in sorted_items[-2:]]
 
-    #Turn predicted label to readable text and also return vis. data
-    if prediction == -1:
-        return {
-            "Sentiment": "Negative",
-            "contributions": contrib_dict,
-            "top_positive": top_positive,
-            "top_negative": top_negative
-            }
-    elif prediction == 0:
-        return {
-            "Sentiment": "Positive",
-            "contributions": contrib_dict,
-            "top_positive": top_positive,
-            "top_negative": top_negative
-            }
+        #Turn predicted label to readable text and also return vis. data
+        if prediction == -1:
+            return {
+                "Sentiment": "Negative",
+                "contributions": contrib_dict,
+                "top_positive": top_positive,
+                "top_negative": top_negative
+                }
+        elif prediction == 0:
+            return {
+                "Sentiment": "Positive",
+                "contributions": contrib_dict,
+                "top_positive": top_positive,
+                "top_negative": top_negative
+                }
+        else:
+            return {"Sentiment": "No output"}
     else:
-        return {"Sentiment": "No output"}
+        return pd.Series(prediction)
