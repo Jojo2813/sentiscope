@@ -126,9 +126,9 @@ Example response:
 - **Johannes Blass** [GitHub](https://github.com/Jojo2813)
 ---
 
-## Going further
+## 🔎 Going further
 Feel free to visit the [about page](https://sentiscope.streamlit.app/about) of
-our web application to find out moreabout the models used and training steps
+our web application to find out more about the models used and training steps
 taken.
 
 ---
