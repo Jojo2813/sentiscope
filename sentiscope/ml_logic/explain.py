@@ -65,7 +65,7 @@ def explain_with_lime(text, predict_proba_fn, num_features=10):
         num_samples=300
     )
 
-    #Sort contributions and extract the words which have the most impact
+    # Sort contributions and extract the words which have the most impact
     # positively and negatively
     contribs = dict(exp.as_list(label=1))
     sorted_contribs = sorted(contribs.items(), key=lambda x: x[1])
