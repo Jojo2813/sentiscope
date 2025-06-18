@@ -27,6 +27,7 @@
   - LIME-based explanation for BERT
 - **Serving**: Dockerized API for production deployment
 
+> Find the [Amazon reviews dataset](https://www.kaggle.com/datasets/bittlingmayer/amazonreviews?select=test.ft.txt.bz2) here
 ---
 
 ## 🚀 Getting Started
@@ -56,7 +57,7 @@ You can run the API locally or via Docker.
 **Locally:**
 
 ```bash
-uvicorn sentiscope.api.fast:app --host 0.0.0.0 --port 8000
+make run_api
 ```
 
 ---
@@ -72,7 +73,7 @@ uvicorn sentiscope.api.fast:app --host 0.0.0.0 --port 8000
 | GET   | `/bert`        | Predict using BERT Transformer     |
 
 Each response includes:
-- `sentiment`: The predicted label (`positive` or `negative`)
+- `sentiment`: The predicted label (`Positive` or `Negative`)
 - `contributions`: Contributions of each word of the review
 - `top positive`: The 2 words with the highest positive contribution
 - `top negative`: The 2 words with the highest negative contribution
